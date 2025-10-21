@@ -6,9 +6,11 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class FileData {
+    private int id;
     private String fileName;
     private String filePath;
-    private long fileSize;
-    private long lastModified;
+    private String fileSize;
+    private String lastModified;
+    private String fileFormat;
     private boolean isFile;
 }

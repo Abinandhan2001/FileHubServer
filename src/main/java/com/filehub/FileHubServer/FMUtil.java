@@ -2,6 +2,7 @@ package com.filehub.FileHubServer;
 
 import com.filehub.FileHubServer.model.ApiResponse;
 import com.filehub.FileHubServer.model.FileData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -20,9 +21,10 @@ import java.util.Objects;
 import static com.filehub.FileHubServer.FMConstants.*;
 
 @Service
-public class Util {
+public class FMUtil {
 
-
+    @Autowired
+    private Utils utils;
     public ResponseEntity<ApiResponse> getFilesList(String path)
     {
         try{
@@ -44,6 +46,7 @@ public class Util {
     {
         ArrayList<FileData> al = new ArrayList<>();
         try{
+            int id = 1;
             for (File f: Objects.requireNonNull(file.listFiles()))
             {
                 if (f == null)
@@ -53,8 +56,39 @@ public class Util {
                 long fSize = f.length();
                 long lastMod = f.lastModified();
                 boolean isFile = f.isFile();
-                FileData fileData = new FileData(fName,fPath,fSize,lastMod,isFile);
+                String fileSize = fSize +" B";
+                if (fSize > 1000)
+                {
+                    fSize /= 1000;
+                    fileSize = fSize + " KB";
+                    if (fSize > 1024)
+                    {
+                        fSize /= 1000;
+                        fileSize = fSize + " MB";
+                        if (fSize > 1024)
+                        {
+                            fSize /= 1000;
+                            fileSize = fSize + " GB";
+                        }
+                    }
+                }
+
+                String lastModTime = utils.millisToTime(lastMod);
+                String fileFormat = "file";
+                int lastDot = fName.lastIndexOf('.');
+                if (lastDot > 0 && lastDot < fName.length() - 1) {
+                    fileFormat = fName.substring(lastDot+1);
+                }
+
+                if (!isFile)
+                {
+                    fileSize = "";
+                    fileFormat = "";
+                }
+                FileData fileData = new FileData(id,fName,fPath,fileSize,lastModTime,fileFormat,isFile);
+                System.out.println(fileData);
                 al.add(fileData);
+                id++;
             }
         } catch (Exception e) {
             return new ArrayList<>();
@@ -64,6 +98,7 @@ public class Util {
 
     public ResponseEntity<?> getFile(String filePath)
     {
+        System.out.println("sending file: "+filePath);
         try{
             File file = new File(filePath);
             if (!file.exists())
