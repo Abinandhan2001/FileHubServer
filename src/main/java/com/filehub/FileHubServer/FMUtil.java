@@ -86,7 +86,6 @@ public class FMUtil {
                     fileFormat = "";
                 }
                 FileData fileData = new FileData(id,fName,fPath,fileSize,lastModTime,fileFormat,isFile);
-                System.out.println(fileData);
                 al.add(fileData);
                 id++;
             }
